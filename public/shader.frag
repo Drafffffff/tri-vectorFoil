@@ -14,7 +14,7 @@ void main() {
   // coordinate
   vec2 uv = vTexCoord;
   float angle = mod(u_time * 1.5, TWO_PI);
-  vec2 pos = vec2(cos(angle), sin(angle)) / 2.5;
+  vec2 pos = vec2(cos(angle), sin(angle)) / 3.;
   uv.y = 1. - uv.y;
   float a = texture2D(tex0, uv).r;
   vec3 color = vec3(0.);

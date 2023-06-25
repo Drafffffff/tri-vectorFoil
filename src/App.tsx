@@ -48,6 +48,43 @@ const App: Component = () => {
       p.rect(x, y, 50, 50);
     };
   };
+  function resizeImageToMax(base64Image: string) {
+    const img = new Image();
+    img.src = base64Image;
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+    //delay until img is ready
+    img.onload = () => {
+      let width = img.width;
+      let height = img.height;
+      setImgWidth(width);
+      setImgHeight(height);
+      console.log(width, height);
+
+      if (width > height) {
+        if (width > 1024) {
+          height *= 1024 / width;
+          width = 1024;
+        }
+      } else {
+        if (height > 1024) {
+          width *= 1024 / height;
+          height = 1024;
+        }
+      }
+
+      canvas.width = width;
+      canvas.height = height;
+      //delay until ctx is ready
+      while (!ctx) {
+        console.log("waiting for ctx");
+      }
+
+      ctx.drawImage(img, 0, 0, width, height);
+
+      setFileBase64(canvas.toDataURL("image/jpeg"));
+    };
+  }
   const handleFileInput = (e: Event) => {
     const file = (e.target as HTMLInputElement).files?.[0];
     setSelectedFile(file ?? null);
@@ -61,39 +98,40 @@ const App: Component = () => {
       reader.readAsDataURL(selectedFile()!);
       reader.onloadend = () => {
         const base64data = reader.result;
-        setFileBase64(base64data as string);
+
+        resizeImageToMax(base64data as string);
+
         //send base64data to server
         setStatusText("正在计算空间坐标...");
-        fetch("https://drafff-dpt-depth-estimation.hf.space/api/predict/", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ data: [base64data] }),
-        })
-          .then((response) => response.json())
-          .then((data) => {
-            const img = data.data[0];
-            setTransformedFile(img);
-            const tmp = new Image();
-            tmp.src = img;
-            tmp.onload = () => {
-              console.log(tmp.width);
-              console.log(tmp.height);
-              setImgWidth(tmp.width);
-              setImgHeight(tmp.height);
-            };
-
-            console.log("Success:", img);
-            setStatusText("");
-            new p5(s, document.getElementById("sketch")!);
-          })
-          .catch((error) => {
-            console.error("Error:", error);
-          });
       };
     }
   });
+
+  createEffect(() => {
+    if (fileBase64()) {
+      //send base64data to server
+      fetch("https://drafff-dpt-depth-estimation.hf.space/api/predict/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ data: [fileBase64()] }),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          const img = data.data[0];
+          setTransformedFile(img);
+          console.log("Success:", img);
+          setStatusText("");
+          new p5(s, document.getElementById("sketch")!);
+        })
+        .catch((error) => {
+          setStatusText("计算失败，请重试");
+          console.error("Error:", error);
+        });
+    }
+  });
+  //createEffect(() => {
   //transform base64 to image and show image
   createEffect(() => {
     if (transformedFile()) {
