@@ -14,11 +14,11 @@ void main() {
   // coordinate
   vec2 uv = vTexCoord;
   float angle = mod(u_time * 1.5, TWO_PI);
-  vec2 pos = vec2(cos(angle), sin(angle)) / 3.;
+  vec2 pos = vec2(cos(angle), sin(angle)) / 2.5;
   uv.y = 1. - uv.y;
   float a = texture2D(tex0, uv).r;
   vec3 color = vec3(0.);
-  color += texture2D(tex1, uv + pos * a * .04).rgb;
+  color += texture2D(tex1, uv + pos * a * .05).rgb;
   gl_FragColor = vec4(color, 1.);
 
   // and now these coordinates are assigned to the color output of the shader
