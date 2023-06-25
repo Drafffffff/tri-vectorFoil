@@ -17,11 +17,8 @@ void main() {
   vec2 pos = vec2(cos(angle), sin(angle)) / 3.;
   uv.y = 1. - uv.y;
   float a = texture2D(tex0, uv).r;
-
   vec3 color = vec3(0.);
-  
   color += texture2D(tex1, uv + pos * a * .04).rgb;
-
   gl_FragColor = vec4(color, 1.);
 
   // and now these coordinates are assigned to the color output of the shader
