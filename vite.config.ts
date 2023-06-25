@@ -11,7 +11,7 @@ export default defineConfig({
     // devtools(),
     solidPlugin(),
   ],
-  base: './',
+  base: '/tri-vectorFoil/',
   server: {
     port: 3000,
   },
